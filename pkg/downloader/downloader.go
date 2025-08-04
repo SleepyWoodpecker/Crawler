@@ -4,6 +4,7 @@ package downloader
 
 import (
 	"bytes"
+	"crawler/pkg/queue"
 	"fmt"
 	"io"
 	"net/http"
@@ -30,14 +31,14 @@ func init() {
 	}
 }
 
-func GetAndParse(url string) (error) {
+func GetAndParse(url string, queue *queue.Queue) (error) {
 	pageContent, err := get(url) 
 
 	if err != nil {
 		return err
 	}
 
-	parseHTMLAndExtractLinks(pageContent)
+	parseHTMLAndExtractLinks(pageContent, queue)
 	return nil
 }
 
@@ -62,7 +63,7 @@ func get(url string) ([]byte, error) {
 }
 
 // get content of the page, then grab all related links on the page
-func parseHTMLAndExtractLinks(content []byte) {
+func parseHTMLAndExtractLinks(content []byte, queue *queue.Queue) {
 	htmlTokenizer := html.NewTokenizer(bytes.NewReader(content))
 	skipDepth := 0
 	tokenCount := 0
@@ -116,8 +117,7 @@ func parseHTMLAndExtractLinks(content []byte) {
 			// push the href into the queue
 			for _, a := range token.Attr {
 				if a.Key == "href" {
-					fmt.Println(a.Val)
-					// push the value into the queue
+					queue.Enqueue(a.Val)
 				}
 			}
 		} else if token.Type.String() == "Text" && asciiAndWhiteSpace.MatchString(token.Data) {
