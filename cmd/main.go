@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"crawler/pkg/downloader"
+	"fmt"
+)
 
 func main() {
-	fmt.Println("Hello there crawler")
+	content, _ := downloader.Get("https://gopl.io")
+
+	fmt.Println(string(content))
 }
