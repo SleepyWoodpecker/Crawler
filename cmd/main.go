@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-const CRAWL_LIMIT = 100
+const CRAWL_LIMIT = 5000
 
 func main() {
 	q := queue.New()

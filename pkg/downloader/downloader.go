@@ -16,11 +16,13 @@ import (
 )
 
 const MAX_ERR_COUNT = 10
+const MAX_THREADS = 20
 
 var (
 	errCount = 0 // global count for the number of errors tolerable before exiting
 	asciiAndWhiteSpace, _ = regexp.Compile("[a-zA-Z0-9]+")
 	skipTags map[string]bool
+	semaphore chan struct{}
 )
 
 func init() {
@@ -29,9 +31,16 @@ func init() {
 		"style":  true,
 		"noscript": true,
 	}
+
+	semaphore = make(chan struct{}, MAX_THREADS)
 }
 
 func GetAndParse(url string, queue *queue.Queue) (error) {
+	// take a semaphore
+	semaphore <- struct{}{}
+	// release it after finishing
+	defer func(){<- semaphore}()
+	
 	pageContent, err := get(url) 
 
 	if err != nil {
