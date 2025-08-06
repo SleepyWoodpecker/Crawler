@@ -40,13 +40,16 @@ func GetAndParse(url string, queue *queue.Queue) (error) {
 	semaphore <- struct{}{}
 	// release it after finishing
 	defer func(){<- semaphore}()
-	
+
 	pageContent, err := get(url) 
 
 	if err != nil {
 		return err
 	}
 
+	// no point making this a separate goroutine because this has a dependency on the data coming in from
+	// the get request anyways. 
+	// not spawning a goroutine here also reduces the unecessary overhead from having to sync this through a channel
 	parseHTMLAndExtractLinks(pageContent, queue)
 	return nil
 }
