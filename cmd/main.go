@@ -12,18 +12,17 @@ func main() {
 	q := queue.New()
 
 	// crawl the first site
-	downloader.GetAndParse("https://www.cc.gatech.edu/", q)
+	downloader.GetAndParse("https://www.ucla.edu/", q)
 
-	for !q.IsEmpty() && q.TotalQueued < 100 {
+	for q.TotalQueued() < CRAWL_LIMIT {
 		url := q.Dequeue()
 		
 		if len(url) == 0 {
-			fmt.Println("Exiting because of empty content")
 			continue
 		}
 
 		println(url)
-		downloader.GetAndParse(url, q)
+		go downloader.GetAndParse(url, q)
 	}
 
 	fmt.Println("Finished running")
